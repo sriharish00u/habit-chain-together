@@ -5,6 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/hooks/useAuth";
+import { useHabits } from "@/hooks/useHabits";
+import { useToast } from "@/hooks/use-toast";
 import { 
   ArrowLeft,
   Camera,
@@ -42,6 +45,10 @@ const frequencies = [
 ];
 
 export function CreateHabitScreen({ onBack, onSave }: CreateHabitScreenProps) {
+  const { user } = useAuth();
+  const { addHabit } = useHabits(user?.id);
+  const { toast } = useToast();
+  
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -72,19 +79,12 @@ export function CreateHabitScreen({ onBack, onSave }: CreateHabitScreenProps) {
   };
 
   const handleSave = () => {
-    // Create new habit object
-    const newHabit = {
-      id: Date.now().toString(),
-      ...formData,
-      streak: 0,
-      todayCompleted: false,
-      weekProgress: 0,
-      chainMembers: 1,
-      points: 0,
-      createdAt: new Date().toISOString()
-    };
-    
-    onSave(newHabit);
+    addHabit(formData);
+    toast({
+      title: "Habit created! 🎉",
+      description: `"${formData.name}" has been added to your habits.`
+    });
+    onSave(formData);
   };
 
   const isStepComplete = () => {

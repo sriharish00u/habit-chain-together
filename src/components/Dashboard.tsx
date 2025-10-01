@@ -1,8 +1,9 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { HabitCard } from "./HabitCard";
+import { useHabits } from "@/hooks/useHabits";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   Plus, 
   Flame, 
@@ -13,7 +14,8 @@ import {
   Settings,
   Target,
   Star,
-  TrendingUp
+  TrendingUp,
+  LogOut
 } from "lucide-react";
 import dashboardBg from "@/assets/dashboard-bg.jpg";
 
@@ -22,61 +24,17 @@ interface DashboardProps {
   onHabitClick: (habitId: string) => void;
 }
 
-// Mock data - in real app this would come from API
-const mockHabits = [
-  {
-    id: "1",
-    name: "Morning Workout",
-    streak: 12,
-    todayCompleted: false,
-    weekProgress: 85,
-    chainMembers: 5,
-    category: "fitness",
-    points: 120,
-    nextReminder: "7:00 AM"
-  },
-  {
-    id: "2", 
-    name: "Read 30 Minutes",
-    streak: 25,
-    todayCompleted: true,
-    weekProgress: 100,
-    chainMembers: 8,
-    category: "learning",
-    points: 250,
-    nextReminder: "8:00 PM"
-  },
-  {
-    id: "3",
-    name: "Meditation",
-    streak: 7,
-    todayCompleted: false,
-    weekProgress: 71,
-    chainMembers: 3,
-    category: "mindfulness",
-    points: 75,
-    nextReminder: "6:30 AM"
-  }
-];
-
-const mockStats = {
-  totalStreak: 44,
-  weeklyPoints: 445,
-  rank: 23,
-  completedToday: 1,
-  totalHabits: 3
-};
-
 export function Dashboard({ onCreateHabit, onHabitClick }: DashboardProps) {
-  const [habits, setHabits] = useState(mockHabits);
+  const { user, logout } = useAuth();
+  const { habits, completeHabit } = useHabits(user?.id);
 
   const handleCompleteHabit = (habitId: string) => {
-    setHabits(prev => prev.map(habit => 
-      habit.id === habitId 
-        ? { ...habit, todayCompleted: true, streak: habit.streak + 1, points: habit.points + 10 }
-        : habit
-    ));
+    completeHabit(habitId);
   };
+
+  const totalStreak = habits.reduce((sum, h) => sum + h.streak, 0);
+  const weeklyPoints = habits.reduce((sum, h) => sum + h.points, 0);
+  const completedToday = habits.filter(h => h.todayCompleted).length;
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -110,6 +68,10 @@ export function Dashboard({ onCreateHabit, onHabitClick }: DashboardProps) {
               <Button variant="floating" size="icon-sm">
                 <Settings className="w-4 h-4" />
               </Button>
+
+              <Button variant="floating" size="icon-sm" onClick={logout}>
+                <LogOut className="w-4 h-4" />
+              </Button>
             </div>
           </div>
 
@@ -118,7 +80,7 @@ export function Dashboard({ onCreateHabit, onHabitClick }: DashboardProps) {
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 mb-1">
                 <Flame className="w-4 h-4 text-warning" />
-                <span className="text-xl font-bold">{mockStats.totalStreak}</span>
+                <span className="text-xl font-bold">{totalStreak}</span>
               </div>
               <span className="text-xs text-white/70">Total Streak</span>
             </div>
@@ -126,7 +88,7 @@ export function Dashboard({ onCreateHabit, onHabitClick }: DashboardProps) {
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 mb-1">
                 <Star className="w-4 h-4 text-gold" />
-                <span className="text-xl font-bold">{mockStats.weeklyPoints}</span>
+                <span className="text-xl font-bold">{weeklyPoints}</span>
               </div>
               <span className="text-xs text-white/70">Weekly Points</span>
             </div>
@@ -134,7 +96,7 @@ export function Dashboard({ onCreateHabit, onHabitClick }: DashboardProps) {
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 mb-1">
                 <Trophy className="w-4 h-4 text-gold" />
-                <span className="text-xl font-bold">#{mockStats.rank}</span>
+                <span className="text-xl font-bold">#{habits.length > 0 ? '1' : '-'}</span>
               </div>
               <span className="text-xs text-white/70">Leaderboard</span>
             </div>
@@ -142,7 +104,7 @@ export function Dashboard({ onCreateHabit, onHabitClick }: DashboardProps) {
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 mb-1">
                 <Target className="w-4 h-4 text-success" />
-                <span className="text-xl font-bold">{mockStats.completedToday}/{mockStats.totalHabits}</span>
+                <span className="text-xl font-bold">{completedToday}/{habits.length}</span>
               </div>
               <span className="text-xs text-white/70">Today</span>
             </div>
@@ -179,20 +141,34 @@ export function Dashboard({ onCreateHabit, onHabitClick }: DashboardProps) {
             </Badge>
           </div>
 
-          <div className="space-y-4">
-            {habits.map((habit) => (
-              <div 
-                key={habit.id}
-                onClick={() => onHabitClick(habit.id)}
-                className="cursor-pointer"
-              >
-                <HabitCard 
-                  habit={habit} 
-                  onComplete={handleCompleteHabit}
-                />
-              </div>
-            ))}
-          </div>
+          {habits.length === 0 ? (
+            <Card className="p-8 border-0 shadow-soft text-center">
+              <Star className="w-12 h-12 text-primary mx-auto mb-3 opacity-50" />
+              <h3 className="font-semibold mb-2">No habits yet</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Create your first habit to start building your chain!
+              </p>
+              <Button onClick={onCreateHabit} variant="hero" size="sm">
+                <Plus className="w-4 h-4" />
+                Create Habit
+              </Button>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {habits.map((habit) => (
+                <div 
+                  key={habit.id}
+                  onClick={() => onHabitClick(habit.id)}
+                  className="cursor-pointer"
+                >
+                  <HabitCard 
+                    habit={habit} 
+                    onComplete={handleCompleteHabit}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Motivational Card */}
