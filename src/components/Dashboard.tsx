@@ -52,143 +52,145 @@ export function Dashboard({ onCreateHabit, onHabitClick }: DashboardProps) {
       />
       
       {/* Header */}
-      <div className="relative z-10 bg-gradient-hero text-white">
-        <div className="px-6 pt-12 pb-8">
+      <header className="relative z-10 bg-gradient-hero text-white shadow-medium">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
           <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-bold">{getGreeting()}</h1>
-              <p className="text-white/80">Keep building your chains! 🔗</p>
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold mb-1">{getGreeting()}</h1>
+              <p className="text-white/90 text-sm">Keep building your chains! 🔗</p>
             </div>
             
-            <div className="flex items-center gap-3">
-              <Button variant="floating" size="icon-sm">
+            <nav className="flex items-center gap-2" aria-label="User actions">
+              <Button variant="floating" size="icon-sm" title="Notifications">
                 <Bell className="w-4 h-4" />
               </Button>
               
-              <Button variant="floating" size="icon-sm">
+              <Button variant="floating" size="icon-sm" title="Settings">
                 <Settings className="w-4 h-4" />
               </Button>
 
-              <Button variant="floating" size="icon-sm" onClick={logout}>
+              <Button variant="floating" size="icon-sm" onClick={logout} title="Logout">
                 <LogOut className="w-4 h-4" />
               </Button>
-            </div>
+            </nav>
           </div>
 
           {/* Stats Row */}
-          <div className="grid grid-cols-4 gap-3">
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <Flame className="w-4 h-4 text-warning" />
-                <span className="text-xl font-bold">{totalStreak}</span>
+          <div className="grid grid-cols-4 gap-4">
+            <div className="flex flex-col items-center p-3 bg-white/10 backdrop-blur-sm rounded-xl">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Flame className="w-5 h-5 text-warning" />
+                <span className="text-2xl font-bold">{totalStreak}</span>
               </div>
-              <span className="text-xs text-white/70">Total Streak</span>
+              <span className="text-xs text-white/80 font-medium">Total Streak</span>
             </div>
             
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <Star className="w-4 h-4 text-gold" />
-                <span className="text-xl font-bold">{weeklyPoints}</span>
+            <div className="flex flex-col items-center p-3 bg-white/10 backdrop-blur-sm rounded-xl">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Star className="w-5 h-5 text-gold" />
+                <span className="text-2xl font-bold">{weeklyPoints}</span>
               </div>
-              <span className="text-xs text-white/70">Weekly Points</span>
+              <span className="text-xs text-white/80 font-medium">Weekly Points</span>
             </div>
             
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <Trophy className="w-4 h-4 text-gold" />
-                <span className="text-xl font-bold">#{habits.length > 0 ? '1' : '-'}</span>
+            <div className="flex flex-col items-center p-3 bg-white/10 backdrop-blur-sm rounded-xl">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Trophy className="w-5 h-5 text-gold" />
+                <span className="text-2xl font-bold">#{habits.length > 0 ? '1' : '-'}</span>
               </div>
-              <span className="text-xs text-white/70">Leaderboard</span>
+              <span className="text-xs text-white/80 font-medium">Leaderboard</span>
             </div>
             
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <Target className="w-4 h-4 text-success" />
-                <span className="text-xl font-bold">{completedToday}/{habits.length}</span>
+            <div className="flex flex-col items-center p-3 bg-white/10 backdrop-blur-sm rounded-xl">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Target className="w-5 h-5 text-success" />
+                <span className="text-2xl font-bold">{completedToday}/{habits.length}</span>
               </div>
-              <span className="text-xs text-white/70">Today</span>
+              <span className="text-xs text-white/80 font-medium">Today</span>
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Main Content */}
-      <div className="relative z-10 px-6 py-6 space-y-6">
+      <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {/* Quick Actions */}
-        <div className="flex gap-3">
+        <section className="flex flex-col sm:flex-row gap-4 mb-8">
           <Button 
             onClick={onCreateHabit}
             variant="hero" 
             size="lg"
-            className="flex-1"
+            className="flex-1 justify-center"
           >
             <Plus className="w-5 h-5" />
             <span>Create Habit</span>
           </Button>
           
-          <Button variant="soft" size="lg">
+          <Button variant="soft" size="lg" className="flex-1 justify-center">
             <Users className="w-5 h-5" />
             <span>Join Chain</span>
           </Button>
-        </div>
+        </section>
 
         {/* Today's Habits Section */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-foreground">Today's Habits</h2>
-            <Badge variant="secondary" className="bg-primary-light/20 text-primary">
+        <section>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-foreground">Today's Habits</h2>
+            <Badge variant="secondary" className="bg-primary/10 text-primary font-semibold px-4 py-1">
               {habits.filter(h => !h.todayCompleted).length} pending
             </Badge>
           </div>
 
           {habits.length === 0 ? (
-            <Card className="p-8 border-0 shadow-soft text-center">
-              <Star className="w-12 h-12 text-primary mx-auto mb-3 opacity-50" />
-              <h3 className="font-semibold mb-2">No habits yet</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Create your first habit to start building your chain!
+            <Card className="p-12 border-0 shadow-medium text-center bg-card">
+              <Star className="w-16 h-16 text-primary mx-auto mb-4 opacity-40" />
+              <h3 className="text-xl font-semibold mb-2 text-foreground">No habits yet</h3>
+              <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+                Create your first habit to start building your chain and track your progress!
               </p>
-              <Button onClick={onCreateHabit} variant="hero" size="sm">
-                <Plus className="w-4 h-4" />
-                Create Habit
+              <Button onClick={onCreateHabit} variant="hero" size="lg">
+                <Plus className="w-5 h-5" />
+                Create First Habit
               </Button>
             </Card>
           ) : (
-            <div className="space-y-4">
+            <div className="grid gap-4">
               {habits.map((habit) => (
-                <div 
+                <button
                   key={habit.id}
                   onClick={() => onHabitClick(habit.id)}
-                  className="cursor-pointer"
+                  className="text-left w-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-xl transition-all hover:scale-[1.01]"
                 >
                   <HabitCard 
                     habit={habit} 
                     onComplete={handleCompleteHabit}
                   />
-                </div>
+                </button>
               ))}
             </div>
           )}
-        </div>
+        </section>
 
         {/* Motivational Card */}
-        <Card className="p-6 bg-gradient-soft border-0 shadow-soft">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-white/50 rounded-xl">
-              <TrendingUp className="w-6 h-6 text-primary" />
+        {habits.length > 0 && (
+          <Card className="p-6 bg-gradient-soft border-0 shadow-medium mt-8">
+            <div className="flex items-center gap-4">
+              <div className="p-4 bg-white/60 rounded-2xl shadow-soft">
+                <TrendingUp className="w-7 h-7 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-primary mb-1 text-lg">You're on fire! 🔥</h3>
+                <p className="text-sm text-primary/80 leading-relaxed">
+                  You've completed {completedToday} out of {habits.length} habits today. Keep it up!
+                </p>
+              </div>
             </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-primary mb-1">You're on fire! 🔥</h3>
-              <p className="text-sm text-primary/80">
-                You've completed 85% of your habits this week. Keep it up!
-              </p>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        )}
 
         {/* Bottom Spacing */}
-        <div className="h-20" />
-      </div>
+        <div className="h-12" />
+      </main>
     </div>
   );
 }
